@@ -12,91 +12,107 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
+  HStack,
   Stack,
   Text,
   DialogActionTrigger,
 } from "@chakra-ui/react";
 
 
-interface Todo {
-  id: string;
-  item: string;
+interface Order {
+  id: number;
+  product_name: string;
+  quantity: number;
+  status: string;
+  created_at: string;
 }
 
-interface UpdateTodoProps {
-  item: string;
-  id: string;
-  fetchTodos: () => Promise<void>;
+interface UpdateOrderStatusProps {
+  id: number;
+  status: string;
+  fetchOrders: () => Promise<void>;
 }
 
-interface DeleteTodoProps {
-    id: string;
-    fetchTodos: () => void;
-  }
-
-interface TodoHelperProps {
-  item: string;
-  id: string;
-  fetchTodos: () => Promise<void>;
+interface DeleteOrderProps {
+  id: number;
+  fetchOrders: () => Promise<void>;
 }
 
-const TodosContext = createContext({
-  todos: [] as Todo[],
-  fetchTodos: async () => {}
-})
+interface OrderHelperProps {
+  order: Order;
+  fetchOrders: () => Promise<void>;
+}
 
-const AddTodo = () => {
-  const [item, setItem] = useState("")
-  const {todos, fetchTodos} = useContext(TodosContext)
+const OrdersContext = createContext({
+  orders: [] as Order[],
+  fetchOrders: async () => {},
+});
 
-  const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setItem(event.target.value)
-  }
+const AddOrder = () => {
+  const [productName, setProductName] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const { fetchOrders } = useContext(OrdersContext);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const newTodo = {
-      "id": todos.length + 1,
-      "item": item
-    }
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-    fetch("http://localhost:8000/todo", {
+    await fetch("http://localhost:8000/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTodo)
-    }).then(fetchTodos)
-  }
+      body: JSON.stringify({
+        product_name: productName,
+        quantity: Number(quantity),
+        status: "pending",
+      }),
+    });
+    await fetchOrders();
+    setProductName("");
+    setQuantity("1");
+  };
 
   return (
     <form onSubmit={handleSubmit}>
-      <Input
-        pr="4.5rem"
-        type="text"
-        placeholder="Add a todo item"
-        aria-label="Add a todo item"
-        onChange={handleInput}
-      />
+      <HStack>
+        <Input
+          pr="4.5rem"
+          type="text"
+          placeholder="Product name"
+          aria-label="Product name"
+          value={productName}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => setProductName(event.target.value)}
+        />
+        <Input
+          w="130px"
+          type="number"
+          min={1}
+          placeholder="Quantity"
+          aria-label="Quantity"
+          value={quantity}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => setQuantity(event.target.value)}
+        />
+        <Button type="submit">Add Order</Button>
+      </HStack>
     </form>
-  )
-}
+  );
+};
 
-const UpdateTodo = ({ item, id, fetchTodos }: UpdateTodoProps) => {
-  const [todo, setTodo] = useState(item)
+const UpdateOrderStatus = ({ id, status, fetchOrders }: UpdateOrderStatusProps) => {
+  const [nextStatus, setNextStatus] = useState(status);
 
-  const updateTodo = async () => {
-    await fetch(`http://localhost:8000/todo/${id}`, {
-      method: "PUT",
+  const updateStatus = async () => {
+    await fetch(`http://localhost:8000/orders/${id}/status`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ item: todo }),
-    })
-    await fetchTodos()
-  }
+      body: JSON.stringify({ status: nextStatus }),
+    });
+    await fetchOrders();
+  };
 
   return (
     <DialogRoot>
       <DialogTrigger asChild>
         <Button h="1.5rem" size="sm">
-          Update Todo
+          Update Status
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -113,82 +129,82 @@ const UpdateTodo = ({ item, id, fetchTodos }: UpdateTodoProps) => {
         zIndex={1000}
       >
         <DialogHeader>
-          <DialogTitle>Update Todo</DialogTitle>
+          <DialogTitle>Update Order Status</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <Input
             pr="4.5rem"
             type="text"
-            placeholder="Update todo item"
-            aria-label="Update todo item"
-            value={todo}
-            onChange={(event) => setTodo(event.target.value)}
+            placeholder="pending / shipped / completed"
+            aria-label="Update order status"
+            value={nextStatus}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setNextStatus(event.target.value)}
           />
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
             <Button variant="outline" size="sm">Cancel</Button>
           </DialogActionTrigger>
-          <Button size="sm" onClick={updateTodo}>Save</Button>
+          <Button size="sm" onClick={updateStatus}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </DialogRoot>
-  )
-}
+  );
+};
 
-const DeleteTodo = ({ id, fetchTodos }: DeleteTodoProps) => {
-    const deleteTodo = async () => {
-      await fetch(`http://localhost:8000/todo/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id })
-      })
-      await fetchTodos()
-    }
-  
-    return (
-      <Button h="1.5rem" size="sm" marginLeft={2} onClick={deleteTodo}>Delete Todo</Button>
-    )
-  }
-
-function TodoHelper({item, id, fetchTodos}: TodoHelperProps) {
-    return (
-      <Box p={1} shadow="sm">
-        <Flex justify="space-between">
-          <Text mt={4} as="div">
-            {item}
-            <Flex align="end">
-              <UpdateTodo item={item} id={id} fetchTodos={fetchTodos}/>
-              <DeleteTodo id={id} fetchTodos={fetchTodos}/>  {/* new */}
-            </Flex>
-          </Text>
-        </Flex>
-      </Box>
-    )
-  }
-
-export default function Todos() {
-  const [todos, setTodos] = useState<Todo[]>([])
-  const fetchTodos = async () => {
-    const response = await fetch("http://localhost:8000/todo")
-    const todos = await response.json()
-    setTodos(todos.data)
-  }
-  useEffect(() => {
-    fetchTodos()
-  }, [])
+const DeleteOrder = ({ id, fetchOrders }: DeleteOrderProps) => {
+  const deleteOrder = async () => {
+    await fetch(`http://localhost:8000/orders/${id}`, {
+      method: "DELETE",
+    });
+    await fetchOrders();
+  };
 
   return (
-    <TodosContext.Provider value={{todos, fetchTodos}}>
+    <Button h="1.5rem" size="sm" marginLeft={2} onClick={deleteOrder}>Delete Order</Button>
+  );
+};
+
+function OrderHelper({ order, fetchOrders }: OrderHelperProps) {
+  return (
+    <Box p={2} shadow="sm">
+      <Flex justify="space-between" align="center">
+        <Text mt={2} as="div">
+          #{order.id} {order.product_name} x {order.quantity} - {order.status}
+        </Text>
+        <Flex align="end">
+          <UpdateOrderStatus id={order.id} status={order.status} fetchOrders={fetchOrders} />
+          <DeleteOrder id={order.id} fetchOrders={fetchOrders} />
+        </Flex>
+      </Flex>
+    </Box>
+  );
+}
+
+export default function Todos() {
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  const fetchOrders = async () => {
+    const response = await fetch("http://localhost:8000/orders");
+    const data = await response.json();
+    setOrders(data.data);
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  return (
+    <OrdersContext.Provider value={{ orders, fetchOrders }}>
       <Container maxW="container.xl" pt="100px">
-      <AddTodo />  {/* new */}
+        <AddOrder />
         <Stack gap={5}>
-          {todos.map((todo: Todo) => (
-            <TodoHelper key={todo.id} item={todo.item} id={todo.id} fetchTodos={fetchTodos} />
+          {orders.map((order: Order) => (
+            <OrderHelper key={order.id} order={order} fetchOrders={fetchOrders} />
           ))}
         </Stack>
       </Container>
-    </TodosContext.Provider>
-  )
+    </OrdersContext.Provider>
+  );
 }
 

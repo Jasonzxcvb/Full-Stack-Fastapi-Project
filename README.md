@@ -24,6 +24,15 @@ Leader 要求：**Git**（1-2 周 quiz）、**FastAPI**、**React**、**Docker**
 
 ## 当前进度
 
+### 技术掌握状态（截至目前）
+
+- [x] FastAPI：已用于项目后端（路由、分层结构、接口调试）
+- [x] React：已用于项目前端（组件、状态、调用后端接口）
+- [x] Docker：已完成后端镜像化与容器运行排错
+- [x] SQL / PostgreSQL：已完成建表与基础 CRUD 验证，并接入后端
+- [ ] Redis：尚未开始（下一阶段）
+- [~] Git：持续练习中，预计 1-2 周后准备 quiz
+
 ### Phase 1（Todo CRUD）已完成
 
 - [x] 后端：`main.py`、`api.py`、CORS、`GET /`、`GET /todo`
@@ -43,9 +52,15 @@ Leader 要求：**Git**（1-2 周 quiz）、**FastAPI**、**React**、**Docker**
 
 - [x] 1) 先把 PostgreSQL 跑起来（本机或容器）
 - [x] 2) SQL 层完成：建表 + 手动验证 `SELECT/INSERT/UPDATE/DELETE`
-- [ ] 3) 后端接数据库（先 `GET /orders`，再 `POST/PATCH`）
-- [ ] 4) 前端改为 `/orders` 和订单字段（`product_name`、`quantity`、`status`）
-- [ ] 5) 拆后端结构：`routers/`、`models/`、`db/`
+- [x] 3) 后端接数据库（`/orders` 路由可用）
+- [x] 4) 前端改为 `/orders` 和订单字段（`product_name`、`quantity`、`status`）
+- [x] 5) 拆后端结构：`routers/`、`models/`、`db/`
+
+### 下一步（Phase 4：Redis）
+
+- [ ] 先做 `GET /orders` 缓存（TTL 60s）
+- [ ] 写操作后清理缓存 key（POST/PATCH/DELETE）
+- [ ] 增加一个简单访问计数（`INCR`）
 
 源码参考：[fastapi-react repo](https://github.com/testdrivenio/fastapi-react)（只看结构）
 
