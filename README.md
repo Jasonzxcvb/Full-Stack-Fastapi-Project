@@ -61,7 +61,42 @@ cd frontend && npm run dev
 # → http://localhost:5173
 ```
 
-Phase 2/3/4 的 docker 命令完成后补在这里。
+## 启动（Phase 2：Docker 后端单容器）
+
+> `docker build` 建议在项目根目录执行；其余命令在任意目录都可以执行。
+
+```bash
+# 1) 构建镜像（把 backend 打包成镜像）
+docker build -t todo-api ./backend
+
+# 2) 运行容器（把容器的 8000 端口映射到宿主机 8000）
+docker run --name todo-api-dev -p 8000:8000 todo-api
+
+# 3) 查看正在运行的容器（确认容器状态）
+docker ps
+
+# 4) 查看容器日志（排查报错/确认服务启动）
+docker logs -f todo-api-dev
+
+# 5) 停止容器（结束运行）
+docker stop todo-api-dev
+
+# 6) 删除容器（清理环境，方便重跑）
+docker rm todo-api-dev
+
+# 7) 查看本机镜像（确认 todo-api 是否存在）
+docker images
+
+# 8) 删除镜像（需要从零重建时使用）
+docker rmi todo-api
+
+# 9) 从已有容器重新启动并附着日志
+docker start -a todo-api-dev
+```
+
+验证地址：
+- 后端文档：`http://localhost:8000/docs`
+- Todo 接口：`http://localhost:8000/todo`
 
 ## 资源
 
