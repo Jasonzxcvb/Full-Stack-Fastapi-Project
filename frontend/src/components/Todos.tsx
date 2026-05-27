@@ -29,12 +29,23 @@ interface UpdateTodoProps {
   fetchTodos: () => Promise<void>;
 }
 
+interface DeleteTodoProps {
+    id: string;
+    fetchTodos: () => void;
+  }
+
+interface TodoHelperProps {
+  item: string;
+  id: string;
+  fetchTodos: () => Promise<void>;
+}
+
 const TodosContext = createContext({
   todos: [] as Todo[],
   fetchTodos: async () => {}
 })
 
-function AddTodo() {
+const AddTodo = () => {
   const [item, setItem] = useState("")
   const {todos, fetchTodos} = useContext(TodosContext)
 
@@ -125,16 +136,36 @@ const UpdateTodo = ({ item, id, fetchTodos }: UpdateTodoProps) => {
   )
 }
 
-function TodoHelper({ item, id, fetchTodos }: UpdateTodoProps) {
-  return (
-    <Box p={1} shadow="sm">
-      <Flex justify="space-between" align="center">
-        <Text as="div">{item}</Text>
-        <UpdateTodo item={item} id={id} fetchTodos={fetchTodos} />
-      </Flex>
-    </Box>
-  )
-}
+const DeleteTodo = ({ id, fetchTodos }: DeleteTodoProps) => {
+    const deleteTodo = async () => {
+      await fetch(`http://localhost:8000/todo/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id })
+      })
+      await fetchTodos()
+    }
+  
+    return (
+      <Button h="1.5rem" size="sm" marginLeft={2} onClick={deleteTodo}>Delete Todo</Button>
+    )
+  }
+
+function TodoHelper({item, id, fetchTodos}: TodoHelperProps) {
+    return (
+      <Box p={1} shadow="sm">
+        <Flex justify="space-between">
+          <Text mt={4} as="div">
+            {item}
+            <Flex align="end">
+              <UpdateTodo item={item} id={id} fetchTodos={fetchTodos}/>
+              <DeleteTodo id={id} fetchTodos={fetchTodos}/>  {/* new */}
+            </Flex>
+          </Text>
+        </Flex>
+      </Box>
+    )
+  }
 
 export default function Todos() {
   const [todos, setTodos] = useState<Todo[]>([])
