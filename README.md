@@ -31,13 +31,21 @@ Leader 要求：**Git**（1-2 周 quiz）、**FastAPI**、**React**、**Docker**
 - [x] `Todos.tsx` + fetch 列表
 - [x] `POST / PUT / DELETE` 前后端
 
-### 下一步：Phase 2（Docker）
+### Phase 2（Docker）已完成
 
-- [ ] 写 `backend/Dockerfile`（先只容器化后端）
-- [ ] `docker build -t todo-api ./backend`
-- [ ] `docker run -p 8000:8000 todo-api`
-- [ ] 用 `docker logs -f <container_id>` 看日志
-- [ ] 前端继续本地 `npm run dev`，验证能访问容器里的后端
+- [x] 写 `backend/Dockerfile`（先只容器化后端）
+- [x] `docker build -t todo-api ./backend`
+- [x] `docker run -p 8000:8000 todo-api`
+- [x] 用 `docker logs -f <container_id>` 看日志
+- [x] 前端继续本地 `npm run dev`，验证能访问容器里的后端
+
+### Phase 3（PostgreSQL）进度（推荐顺序）
+
+- [x] 1) 先把 PostgreSQL 跑起来（本机或容器）
+- [x] 2) SQL 层完成：建表 + 手动验证 `SELECT/INSERT/UPDATE/DELETE`
+- [ ] 3) 后端接数据库（先 `GET /orders`，再 `POST/PATCH`）
+- [ ] 4) 前端改为 `/orders` 和订单字段（`product_name`、`quantity`、`status`）
+- [ ] 5) 拆后端结构：`routers/`、`models/`、`db/`
 
 源码参考：[fastapi-react repo](https://github.com/testdrivenio/fastapi-react)（只看结构）
 
@@ -70,7 +78,7 @@ cd frontend && npm run dev
 docker build -t todo-api ./backend
 
 # 2) 运行容器（把容器的 8000 端口映射到宿主机 8000）
-docker run --name todo-api-dev -p 8000:8000 todo-api
+docker run -d --name todo-api-dev -p 8000:8000 todo-api
 
 # 3) 查看正在运行的容器（确认容器状态）
 docker ps
@@ -94,30 +102,29 @@ docker rmi todo-api
 docker start -a todo-api-dev
 ```
 
-验证地址：
-- 后端文档：`http://localhost:8000/docs`
-- Todo 接口：`http://localhost:8000/todo`
+## 启动（Phase 3：PostgreSQL，使用 Docker）
 
-## 资源
+```bash
+# 1) 启动 PostgreSQL 容器（创建数据库 order_app）
+docker run --name order-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=order_app \
+  -p 5432:5432 \
+  -d postgres:16
 
-| 技术 | 链接 |
-|------|------|
-| FastAPI | [Tutorial](https://fastapi.tiangolo.com/tutorial/) |
-| React | [Learn](https://react.dev/learn) |
-| Git | [Pro Git 中文版](https://git-scm.com/book/zh/v2) 第 1-3 章 |
-| Docker | [Get Started](https://docs.docker.com/get-started/) |
-| SQL | [SQLBolt](https://sqlbolt.com/) |
-| Redis | [Get Started](https://redis.io/docs/latest/develop/get-started/) |
+# 2) 检查容器是否在运行
+docker ps
 
-### Docker 教程（按顺序）
+# 3) 进入 PostgreSQL 命令行（psql）
+docker exec -it order-postgres psql -U postgres -d order_app
+```
 
-1. [Docker 官方 Get Started](https://docs.docker.com/get-started/)（先熟悉 image/container/build/run）
-2. [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)（写 `Dockerfile` 时查指令）
-3. [Docker CLI reference](https://docs.docker.com/reference/cli/docker/)（查 `docker build/run/logs/ps` 参数）
-4. （可选进阶）[Docker Compose getting started](https://docs.docker.com/compose/gettingstarted/)（Phase 3 再看）
+常用维护命令：
 
-## 日程（约两周，可弹性调整）
-
-1-2 Git · 3-5 Phase 1 · 6-7 Phase 2 · 8-9 Phase 3 · 10 Phase 4 · 11 联调 · 12-14 Git quiz + demo
-
-**不提交**：`node_modules/`、`.venv/`、`dist/`、`.env`
+```bash
+# 停止/启动/删除 PostgreSQL 容器
+docker stop order-postgres
+docker start order-postgres
+docker rm -f order-postgres
+```
