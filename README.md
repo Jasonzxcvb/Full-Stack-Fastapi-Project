@@ -22,14 +22,22 @@ Leader 要求：**Git**（1-2 周 quiz）、**FastAPI**、**React**、**Docker**
 | 读官方文档 | 概念问题（CORS、useEffect 等） |
 | Git commit | **不**写 CRUD、**不**搭 docker-compose |
 
-## 当前进度（Phase 1）
+## 当前进度
+
+### Phase 1（Todo CRUD）已完成
 
 - [x] 后端：`main.py`、`api.py`、CORS、`GET /`、`GET /todo`
 - [x] 前端：Vite 脚手架、`Header`、Chakra UI、`index.css`
-- [ ] `Todos.tsx` + fetch 列表
-- [ ] `POST / PUT / DELETE` 前后端
+- [x] `Todos.tsx` + fetch 列表
+- [x] `POST / PUT / DELETE` 前后端
 
-**下一步**：写 `Todos.tsx` → `App.tsx` 加 `<Todos />` → 补 POST 路由。每完成一个路由 commit 一次。
+### 下一步：Phase 2（Docker）
+
+- [ ] 写 `backend/Dockerfile`（先只容器化后端）
+- [ ] `docker build -t todo-api ./backend`
+- [ ] `docker run -p 8000:8000 todo-api`
+- [ ] 用 `docker logs -f <container_id>` 看日志
+- [ ] 前端继续本地 `npm run dev`，验证能访问容器里的后端
 
 源码参考：[fastapi-react repo](https://github.com/testdrivenio/fastapi-react)（只看结构）
 
@@ -65,6 +73,13 @@ Phase 2/3/4 的 docker 命令完成后补在这里。
 | Docker | [Get Started](https://docs.docker.com/get-started/) |
 | SQL | [SQLBolt](https://sqlbolt.com/) |
 | Redis | [Get Started](https://redis.io/docs/latest/develop/get-started/) |
+
+### Docker 教程（按顺序）
+
+1. [Docker 官方 Get Started](https://docs.docker.com/get-started/)（先熟悉 image/container/build/run）
+2. [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)（写 `Dockerfile` 时查指令）
+3. [Docker CLI reference](https://docs.docker.com/reference/cli/docker/)（查 `docker build/run/logs/ps` 参数）
+4. （可选进阶）[Docker Compose getting started](https://docs.docker.com/compose/gettingstarted/)（Phase 3 再看）
 
 ## 日程（约两周，可弹性调整）
 
